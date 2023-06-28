@@ -1,4 +1,4 @@
-export { BimapMixed } from "./bimap-mixed";
-export { BimapExclusive } from "./bimap-exclusive";
-export { MapOfSets } from "./map-of-sets";
+export { BimapMixed } from "./bimap-mixed.js";
+export { BimapExclusive } from "./bimap-exclusive.js";
+export { MapOfSets } from "./map-of-sets.js";
 //# sourceMappingURL=index.d.ts.map

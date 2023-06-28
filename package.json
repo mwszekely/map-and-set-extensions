@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "packageManager": "pnpm@8.6.5",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
