@@ -18,4 +18,3 @@ export declare class BimapExclusive<KeyLeft, KeyRight> {
     forEach(callbackfn: (keyA: KeyLeft | KeyRight, keyB: KeyLeft | KeyRight, bimap: BimapExclusive<KeyLeft, KeyRight>) => void): void;
     get size(): number;
 }
-//# sourceMappingURL=bimap-exclusive.d.ts.map

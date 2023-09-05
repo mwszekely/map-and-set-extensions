@@ -1,6 +1,6 @@
 
 type RecursiveMapKeys<M> = M extends Map<infer K, infer V> ? [K, ...RecursiveMapKeys<V>] : [];
-type RecursiveMapValue<M> = M extends Map<infer K, infer V> ? RecursiveMapValue<V> : M;
+type RecursiveMapValue<M> = M extends Map<any, infer V> ? RecursiveMapValue<V> : M;
 
 export const RecursiveMap = {
     set: recursiveMapSet,

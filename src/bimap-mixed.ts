@@ -99,7 +99,7 @@ export class BimapMixed<KeyLeft, KeyRight> {
     }
 
     forEach(callbackfn: (keyLeft: KeyLeft, keyRight: KeyRight, bimap: BimapMixed<KeyLeft, KeyRight>) => void) {
-        return this.#implLeft.forEach((value, key, map) => { return callbackfn(key, value, this); })
+        return this.#implLeft.forEach((value, key) => { return callbackfn(key, value, this); })
     }
 
     get size(): number {

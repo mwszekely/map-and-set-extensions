@@ -25,4 +25,3 @@ export declare class BimapMixed<KeyLeft, KeyRight> {
     forEach(callbackfn: (keyLeft: KeyLeft, keyRight: KeyRight, bimap: BimapMixed<KeyLeft, KeyRight>) => void): void;
     get size(): number;
 }
-//# sourceMappingURL=bimap-mixed.d.ts.map

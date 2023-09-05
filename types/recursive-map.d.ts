@@ -1,5 +1,5 @@
 type RecursiveMapKeys<M> = M extends Map<infer K, infer V> ? [K, ...RecursiveMapKeys<V>] : [];
-type RecursiveMapValue<M> = M extends Map<infer K, infer V> ? RecursiveMapValue<V> : M;
+type RecursiveMapValue<M> = M extends Map<any, infer V> ? RecursiveMapValue<V> : M;
 export declare const RecursiveMap: {
     set: typeof recursiveMapSet;
     get: typeof recursiveMapGet;
@@ -15,4 +15,3 @@ type ModifyRecursiveMap<M extends Map<any, any>> = (prev: RecursiveMapValue<M> |
 declare function recursiveMapSet<M extends Map<any, any>>(map: M, ...keysAndValue: [...RecursiveMapKeys<M>, RecursiveMapValue<M>]): void;
 declare function recursiveMapModify<M extends Map<any, any>>(map: M, ...keysAndValue: [...RecursiveMapKeys<M>, ModifyRecursiveMap<M>]): void;
 export {};
-//# sourceMappingURL=recursive-map.d.ts.map
