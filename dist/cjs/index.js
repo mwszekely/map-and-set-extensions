@@ -2,81 +2,70 @@
 
 var tslib = require('tslib');
 
-var _BimapExclusive_impl;
-/**
- * A variant of a map that's a 1-1 mapping between key->value OR value->key. Can be used to represent certain types of Enums, for example.
- *
- * Unlike `BimapSeparate`, this assumes that the two keys are mutually exclusive and saves a bit of work by only having one `Map` instead of two.
- */
-class BimapExclusive {
-    constructor() {
-        _BimapExclusive_impl.set(this, new Map());
+function add$1(map, left, right) {
+    console.assert(map.has(left) === map.has(right), "A key has been re-defined, which will likely lead to undefined behavior when iterating. If you need to change a mapping, delete it first.");
+    try {
+        map.set(left, right);
+        map.set(right, left);
     }
-    /**
-     * Adds a new value to this bimap, associating these two keys with one another.
-     */
-    add(left, right) {
-        console.assert(tslib.__classPrivateFieldGet(this, _BimapExclusive_impl, "f").has(left) === tslib.__classPrivateFieldGet(this, _BimapExclusive_impl, "f").has(right), "A key has been re-defined, which will likely lead to undefined behavior when iterating. If you need to change a mapping, delete it first.");
-        try {
-            tslib.__classPrivateFieldGet(this, _BimapExclusive_impl, "f").set(left, right);
-            tslib.__classPrivateFieldGet(this, _BimapExclusive_impl, "f").set(right, left);
-        }
-        catch (ex) {
-            // Can `set` throw? Just in case...
-            tslib.__classPrivateFieldGet(this, _BimapExclusive_impl, "f").delete(left);
-            tslib.__classPrivateFieldGet(this, _BimapExclusive_impl, "f").delete(right);
-            throw ex;
-        }
-        return this;
+    catch (ex) {
+        // Can `set` throw? Just in case...
+        map.delete(left);
+        map.delete(right);
+        throw ex;
     }
-    delete(key) {
-        if (tslib.__classPrivateFieldGet(this, _BimapExclusive_impl, "f").has(key)) {
-            let other = tslib.__classPrivateFieldGet(this, _BimapExclusive_impl, "f").get(key);
-            tslib.__classPrivateFieldGet(this, _BimapExclusive_impl, "f").delete(key);
-            tslib.__classPrivateFieldGet(this, _BimapExclusive_impl, "f").delete(other);
-            return true;
-        }
-        return false;
+    return map;
+}
+function del$1(map, key) {
+    if (map.has(key)) {
+        let other = map.get(key);
+        map.delete(key);
+        map.delete(other);
+        return true;
     }
-    has(key) {
-        return tslib.__classPrivateFieldGet(this, _BimapExclusive_impl, "f").has(key);
-    }
-    get(key) {
-        return tslib.__classPrivateFieldGet(this, _BimapExclusive_impl, "f").get(key);
-    }
-    clear() {
-        tslib.__classPrivateFieldGet(this, _BimapExclusive_impl, "f").clear();
-    }
-    *entries() {
-        // This assumes certain standardized things about insertion order and such,
-        // but it's this way to prevent duplicates.
-        let skip = false;
-        for (let [left, right] of tslib.__classPrivateFieldGet(this, _BimapExclusive_impl, "f")) {
-            if (skip)
-                continue;
-            yield [left, right];
-            skip = !skip;
-        }
-    }
-    forEach(callbackfn) {
-        let entries = this.entries();
-        for (let [keyA, keyB] of entries) {
-            callbackfn(keyA, keyB, this);
-        }
-    }
-    // These contain duplicates. Is it guaranteed to ALWAYS be safe to return every other entry? Because that would work if it's allowed.
-    /*entries() {
-        return this.#impl.entries();
-    }
-
-    forEach(callbackfn: (keyLeft: KeyLeft, keyRight: KeyRight, bimap: Bimap<KeyLeft, KeyRight>) => void) {
-        return this.#impl.forEach((value, key, map) => { return callbackfn(key, value, this); })
-    }*/
-    get size() {
-        return tslib.__classPrivateFieldGet(this, _BimapExclusive_impl, "f").size / 2;
+    return false;
+}
+function has$2(map, key) {
+    return map.has(key);
+}
+function get$1(map, key) {
+    return map.get(key);
+}
+function clear(map) {
+    map.clear();
+}
+function* entries(map) {
+    // This assumes certain standardized things about insertion order and such,
+    // but it's this way to prevent duplicates.
+    let skip = false;
+    for (let [left, right] of map) {
+        if (skip)
+            continue;
+        yield [left, right];
+        skip = !skip;
     }
 }
-_BimapExclusive_impl = new WeakMap();
+function forEach(map, callbackfn) {
+    let entries2 = entries(map);
+    for (let [keyA, keyB] of entries2) {
+        callbackfn(keyA, keyB, map);
+    }
+}
+function size(map) {
+    return map.size / 2;
+}
+
+var bimapExclusive = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    add: add$1,
+    clear: clear,
+    delete: del$1,
+    entries: entries,
+    forEach: forEach,
+    get: get$1,
+    has: has$2,
+    size: size
+});
 
 var _BimapMixed_implLeft, _BimapMixed_implRight;
 /**
@@ -167,57 +156,54 @@ class BimapMixed {
 }
 _BimapMixed_implLeft = new WeakMap(), _BimapMixed_implRight = new WeakMap();
 
-function modifyMapAt(map, key, fn) {
+function modify$1(map, key, fn) {
     return map.set(key, fn(map.get(key)));
 }
 
-/**
- * Functions to handle the specialization of a `Map` whose values are always a `Set`.
- */
-const MapOfSets = {
-    add: (map, key, value) => {
-        var _a;
-        let set = (_a = map.get(key)) !== null && _a !== void 0 ? _a : new Set();
-        set.add(value);
-        map.set(key, set);
-        return map;
-    },
-    /**
-     * Removes this `value` from the `Set` associated with `key`. Does not remove the `Set` itself, even if it becomes empty.
-     */
-    delete: (map, key, value) => {
-        var _a;
-        let set = (_a = map.get(key)) !== null && _a !== void 0 ? _a : new Set();
-        let ret = set.delete(value);
-        map.set(key, set);
-        return ret;
-    },
-    has: (map, key, value) => {
-        var _a, _b;
-        return (_b = (_a = map.get(key)) === null || _a === void 0 ? void 0 : _a.has(value)) !== null && _b !== void 0 ? _b : false;
-    }
-};
+var mapHelpers = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    modify: modify$1
+});
 
-const RecursiveMap = {
-    set: recursiveMapSet,
-    get: recursiveMapGet,
-    has: recursiveMapHas,
-    /**
-     * Like `set`, but takes a callback that allows you to modify a previous value, if any.
-     */
-    modify: recursiveMapModify,
-};
-function recursiveMapGet(map, ...keys) {
-    const [firstKey, ...restKeys] = keys;
-    if (restKeys.length === 0) {
-        return map.get(firstKey);
-    }
-    let subMap = map.get(firstKey);
-    if (subMap === undefined)
-        return undefined;
-    return recursiveMapGet(subMap, ...restKeys);
+function add(map, key, value) {
+    var _a;
+    let set = (_a = map.get(key)) !== null && _a !== void 0 ? _a : new Set();
+    set.add(value);
+    map.set(key, set);
+    return map;
 }
-function recursiveMapHas(map, ...keys) {
+/**
+ * Removes this `value` from the `Set` associated with `key`. Does not remove the `Set` itself, even if it becomes empty.
+ */
+function del(map, key, value) {
+    var _a;
+    let set = (_a = map.get(key)) !== null && _a !== void 0 ? _a : new Set();
+    let ret = set.delete(value);
+    map.set(key, set);
+    return ret;
+}
+function has$1(map, key, value) {
+    var _a, _b;
+    return (_b = (_a = map.get(key)) === null || _a === void 0 ? void 0 : _a.has(value)) !== null && _b !== void 0 ? _b : false;
+}
+
+var mapOfSets = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    add: add,
+    delete: del,
+    has: has$1
+});
+
+function get(map, ...keys) {
+    if (keys.length === 0) {
+        return map;
+    }
+    const [firstKey, ...restKeys] = keys;
+    if (map.has(firstKey))
+        return get(map.get(firstKey), ...restKeys);
+    return undefined;
+}
+function has(map, ...keys) {
     const [firstKey, ...restKeys] = keys;
     if (restKeys.length === 0) {
         return map.has(firstKey);
@@ -225,12 +211,15 @@ function recursiveMapHas(map, ...keys) {
     let subMap = map.get(firstKey);
     if (subMap === undefined)
         return false;
-    return recursiveMapHas(subMap, ...restKeys);
+    return has(subMap, ...restKeys);
 }
-function recursiveMapSet(map, ...keysAndValue) {
-    return recursiveMapModify(map, ...keysAndValue.slice(0, keysAndValue.length - 1), () => keysAndValue[keysAndValue.length - 1]);
+function set(map, ...keysAndValue) {
+    return modify(map, ...keysAndValue.slice(0, keysAndValue.length - 1), () => keysAndValue[keysAndValue.length - 1]);
 }
-function recursiveMapModify(map, ...keysAndValue) {
+/**
+ * Like `set`, but takes a callback that allows you to modify a previous value, if any.
+ */
+function modify(map, ...keysAndValue) {
     const [firstKey, ...restKeysAndValue] = keysAndValue;
     if (restKeysAndValue.length == 1) {
         let had = map.has(firstKey);
@@ -242,14 +231,22 @@ function recursiveMapModify(map, ...keysAndValue) {
         if (subMap == null) {
             map.set(firstKey, subMap = new Map());
         }
-        recursiveMapModify(subMap, ...restKeysAndValue);
+        modify(subMap, ...restKeysAndValue);
     }
 }
 
-exports.BimapExclusive = BimapExclusive;
+var recursiveMap = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    get: get,
+    has: has,
+    modify: modify,
+    set: set
+});
+
+exports.BimapExclusive = bimapExclusive;
 exports.BimapMixed = BimapMixed;
-exports.MapOfSets = MapOfSets;
-exports.RecursiveMap = RecursiveMap;
-exports.modifyMapAt = modifyMapAt;
+exports.MapHelpers = mapHelpers;
+exports.MapOfSets = mapOfSets;
+exports.RecursiveMap = recursiveMap;
 module.exports = Object.assign(exports.default, exports);
 //# sourceMappingURL=index.js.map

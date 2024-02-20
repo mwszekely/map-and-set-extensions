@@ -17,7 +17,7 @@
 
 
     "allowSyntheticDefaultImports": true,
-    "lib": ["es6", "DOM"],
+    "lib": ["ESNext", "DOM"],
     "module": "ESNext",
     "moduleResolution": "node",
     "noUnusedLocals": true,

@@ -4,83 +4,74 @@
  * 
  * Unlike `BimapSeparate`, this assumes that the two keys are mutually exclusive and saves a bit of work by only having one `Map` instead of two.
  */
-export class BimapExclusive<KeyLeft, KeyRight> {
-    #impl = new Map<KeyLeft | KeyRight, KeyRight | KeyLeft>();
+type BimapExclusive<KeyLeft, KeyRight> = Map<KeyLeft | KeyRight, KeyLeft | KeyRight>;
 
-    /**
-     * Adds a new value to this bimap, associating these two keys with one another.
-     */
-    add(left: KeyLeft, right: KeyRight): this {
-        console.assert(this.#impl.has(left) === this.#impl.has(right), "A key has been re-defined, which will likely lead to undefined behavior when iterating. If you need to change a mapping, delete it first.");
+function add<KeyLeft, KeyRight>(map: BimapExclusive<KeyLeft, KeyRight>, left: KeyLeft, right: KeyRight) {
+    console.assert(map.has(left) === map.has(right), "A key has been re-defined, which will likely lead to undefined behavior when iterating. If you need to change a mapping, delete it first.");
 
-        try {
-            this.#impl.set(left, right);
-            this.#impl.set(right, left);
-        }
-        catch (ex) {
-            // Can `set` throw? Just in case...
-            this.#impl.delete(left);
-            this.#impl.delete(right);
-            throw ex;
-        }
-        return this;
+    try {
+        map.set(left, right);
+        map.set(right, left);
     }
-
-    delete(key: KeyLeft | KeyRight): boolean {
-        if (this.#impl.has(key)) {
-            let other: KeyLeft | KeyRight = this.#impl.get(key)!;
-            this.#impl.delete(key);
-            this.#impl.delete(other);
-
-            return true;
-        }
-        return false;
+    catch (ex) {
+        // Can `set` throw? Just in case...
+        map.delete(left);
+        map.delete(right);
+        throw ex;
     }
+    return map;
+}
 
-    has(key: KeyLeft | KeyRight): boolean {
-        return this.#impl.has(key);
+function del<KeyLeft, KeyRight>(map: BimapExclusive<KeyLeft, KeyRight>, key: KeyLeft | KeyRight): boolean {
+    if (map.has(key)) {
+        let other: KeyLeft | KeyRight = map.get(key)!;
+        map.delete(key);
+        map.delete(other);
+
+        return true;
     }
+    return false;
+}
 
-    get(key: KeyRight): KeyLeft | undefined;
-    get(key: KeyLeft): KeyRight | undefined;
-    get(key: KeyLeft | KeyRight): KeyLeft | KeyRight | undefined {
-        return this.#impl.get(key);
-    }
+function has<KeyLeft, KeyRight>(map: BimapExclusive<KeyLeft, KeyRight>, key: KeyLeft | KeyRight): boolean {
+    return map.has(key);
+}
 
-    clear() {
-        this.#impl.clear();
-    }
+function get<KeyLeft, KeyRight>(map: BimapExclusive<KeyLeft, KeyRight>, key: KeyRight): KeyLeft | undefined;
+function get<KeyLeft, KeyRight>(map: BimapExclusive<KeyLeft, KeyRight>, key: KeyLeft): KeyRight | undefined;
+function get<KeyLeft, KeyRight>(map: BimapExclusive<KeyLeft, KeyRight>, key: KeyLeft | KeyRight): KeyLeft | KeyRight | undefined {
+    return map.get(key);
+}
 
-    *entries() {
-        // This assumes certain standardized things about insertion order and such,
-        // but it's this way to prevent duplicates.
-        let skip = false;
-        for (let [left, right] of this.#impl) {
-            if (skip)
-                continue;
+function clear<KeyLeft, KeyRight>(map: BimapExclusive<KeyLeft, KeyRight>) {
+    map.clear();
+}
 
-            yield [left, right] as const;
-            skip = !skip;
-        }
-    }
+function *entries<KeyLeft, KeyRight>(map: BimapExclusive<KeyLeft, KeyRight>) {
+    // This assumes certain standardized things about insertion order and such,
+    // but it's this way to prevent duplicates.
+    let skip = false;
+    for (let [left, right] of map) {
+        if (skip)
+            continue;
 
-    forEach(callbackfn: (keyA: KeyLeft | KeyRight, keyB: KeyLeft | KeyRight, bimap: BimapExclusive<KeyLeft, KeyRight>) => void) {
-        let entries = this.entries();
-        for (let [keyA, keyB] of entries) {
-            callbackfn(keyA, keyB, this);
-        }
-    }
-
-    // These contain duplicates. Is it guaranteed to ALWAYS be safe to return every other entry? Because that would work if it's allowed.
-    /*entries() {
-        return this.#impl.entries();
-    }
-
-    forEach(callbackfn: (keyLeft: KeyLeft, keyRight: KeyRight, bimap: Bimap<KeyLeft, KeyRight>) => void) {
-        return this.#impl.forEach((value, key, map) => { return callbackfn(key, value, this); })
-    }*/
-
-    get size(): number {
-        return this.#impl.size / 2;
+        yield [left, right] as const;
+        skip = !skip;
     }
 }
+
+function forEach<KeyLeft, KeyRight>(map: BimapExclusive<KeyLeft, KeyRight>, callbackfn: (keyA: KeyLeft | KeyRight, keyB: KeyLeft | KeyRight, bimap: BimapExclusive<KeyLeft, KeyRight>) => void) {
+    let entries2 = entries(map);
+    for (let [keyA, keyB] of entries2) {
+        callbackfn(keyA, keyB, map);
+    }
+}
+
+function size(map: BimapExclusive<unknown, unknown>): number {
+    return map.size / 2;
+}
+
+
+export {
+    add, clear, del as delete, entries, forEach, get, has, size
+};

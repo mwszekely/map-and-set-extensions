@@ -3,18 +3,14 @@
  *
  * Unlike `BimapSeparate`, this assumes that the two keys are mutually exclusive and saves a bit of work by only having one `Map` instead of two.
  */
-export declare class BimapExclusive<KeyLeft, KeyRight> {
-    #private;
-    /**
-     * Adds a new value to this bimap, associating these two keys with one another.
-     */
-    add(left: KeyLeft, right: KeyRight): this;
-    delete(key: KeyLeft | KeyRight): boolean;
-    has(key: KeyLeft | KeyRight): boolean;
-    get(key: KeyRight): KeyLeft | undefined;
-    get(key: KeyLeft): KeyRight | undefined;
-    clear(): void;
-    entries(): Generator<readonly [KeyLeft | KeyRight, KeyLeft | KeyRight], void, unknown>;
-    forEach(callbackfn: (keyA: KeyLeft | KeyRight, keyB: KeyLeft | KeyRight, bimap: BimapExclusive<KeyLeft, KeyRight>) => void): void;
-    get size(): number;
-}
+type BimapExclusive<KeyLeft, KeyRight> = Map<KeyLeft | KeyRight, KeyLeft | KeyRight>;
+declare function add<KeyLeft, KeyRight>(map: BimapExclusive<KeyLeft, KeyRight>, left: KeyLeft, right: KeyRight): BimapExclusive<KeyLeft, KeyRight>;
+declare function del<KeyLeft, KeyRight>(map: BimapExclusive<KeyLeft, KeyRight>, key: KeyLeft | KeyRight): boolean;
+declare function has<KeyLeft, KeyRight>(map: BimapExclusive<KeyLeft, KeyRight>, key: KeyLeft | KeyRight): boolean;
+declare function get<KeyLeft, KeyRight>(map: BimapExclusive<KeyLeft, KeyRight>, key: KeyRight): KeyLeft | undefined;
+declare function get<KeyLeft, KeyRight>(map: BimapExclusive<KeyLeft, KeyRight>, key: KeyLeft): KeyRight | undefined;
+declare function clear<KeyLeft, KeyRight>(map: BimapExclusive<KeyLeft, KeyRight>): void;
+declare function entries<KeyLeft, KeyRight>(map: BimapExclusive<KeyLeft, KeyRight>): Generator<readonly [KeyLeft | KeyRight, KeyLeft | KeyRight], void, unknown>;
+declare function forEach<KeyLeft, KeyRight>(map: BimapExclusive<KeyLeft, KeyRight>, callbackfn: (keyA: KeyLeft | KeyRight, keyB: KeyLeft | KeyRight, bimap: BimapExclusive<KeyLeft, KeyRight>) => void): void;
+declare function size(map: BimapExclusive<unknown, unknown>): number;
+export { add, clear, del as delete, entries, forEach, get, has, size };

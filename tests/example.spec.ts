@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { BimapExclusive, BimapMixed, RecursiveMap } from "../dist/index";
+import { BimapExclusive, BimapMixed, RecursiveMap } from "../dist/cjs/index.js";
 
 test("recursive map", async () => {
   let map = new Map<string, Map<number, string>>();
